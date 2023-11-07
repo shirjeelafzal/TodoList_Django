@@ -24,9 +24,8 @@ class Task(models.Model):
     deadline=models.DateTimeField()
     start=models.DateTimeField()
     tag=models.CharField(max_length=15)
-    
-    creator = models.ForeignKey(User, on_delete=models.CASCADE,related_name='task2task',default='1')
-    assigner=models.ForeignKey(User, on_delete=models.CASCADE,related_name='assigners',default='1')
+    creator= models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name='task2task',default=None)
+    assigner=models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name='assigners',default=None)
     def __str__(self):
         return self.name
     
@@ -35,15 +34,15 @@ class File(models.Model):
     files=models.FileField()
     task=models.ForeignKey(Task, on_delete=models.CASCADE)
     def __str__(self):
-        return self.task
+        return (str(self.task))
     
 class History(models.Model):
     Desciption_change=models.TextField()
     time=models.DateTimeField()
     
     task=models.ForeignKey(Task, on_delete=models.CASCADE)
-    user=models.ForeignKey(User, on_delete=models.CASCADE)
+    user=models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     
     def __str__(self):
-        return self.task
+        return (str(self.task))
     

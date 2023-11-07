@@ -1,5 +1,5 @@
 from django.contrib import admin
-from todo.models import Task,File,History,CustomUser
+from todo.models import Task ,File,History,CustomUser
 # Register your models here.
 admin.site.register(Task)
 admin.site.register(File)

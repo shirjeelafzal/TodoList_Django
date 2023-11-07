@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib.auth.models import AbstractUser
+
 # Create your models here.
 class CustomUser(User):
     # Add your custom fields here
@@ -20,7 +20,7 @@ class Task(models.Model):
     name=models.CharField(max_length=15)
     description=models.TextField()
     status=models.CharField(max_length=15, choices=status_choices,default="to_do")
-    prority=models.CharField(max_length=15,choices=priority_choices,default="low")  
+    priority=models.CharField(max_length=15,choices=priority_choices,default="low")
     deadline=models.DateTimeField()
     start=models.DateTimeField()
     tag=models.CharField(max_length=15)
@@ -32,7 +32,7 @@ class Task(models.Model):
     
 class File(models.Model):
     files=models.FileField()
-    task=models.ForeignKey(Task, on_delete=models.CASCADE)
+    task=models.ForeignKey(Task, on_delete=models.CASCADE,default=None)
     def __str__(self):
         return (str(self.task))
     
@@ -40,8 +40,8 @@ class History(models.Model):
     Desciption_change=models.TextField()
     time=models.DateTimeField()
     
-    task=models.ForeignKey(Task, on_delete=models.CASCADE)
-    user=models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    task=models.ForeignKey(Task, on_delete=models.CASCADE,default=None)
+    user=models.ForeignKey(CustomUser, on_delete=models.CASCADE,default=None)
     
     def __str__(self):
         return (str(self.task))

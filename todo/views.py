@@ -12,9 +12,9 @@ def todo_task(request):
     serializer=TaskSerializer(todo,many=True)
     # jason_data=JSONRenderer().render(serializer.data)
     #HttpResponse(jason_data,content_type='application/json')
-    return JsonResponse(serializer.data)
+    return JsonResponse(serializer.data,safe=False)
 def todo_user(request):
-    todo=User.objects.all()
+    todo=CustomUser.objects.all()
     serializer=CustomUserSerializer(todo,many=True)
     return JsonResponse(serializer.data,safe=False)
 

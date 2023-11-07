@@ -20,13 +20,13 @@ class TaskSerializer(serializers.Serializer):
     name=serializers.CharField(max_length=15)
     description = serializers.CharField(allow_blank=True, allow_null=True)
     status=serializers.ChoiceField(choices=status_choices,default="to_do")
-    prority=serializers.ChoiceField(choices=priority_choices,default="low")  
+    priority=serializers.ChoiceField(choices=priority_choices,default="low")
     deadline=serializers.DateTimeField()
     start=serializers.DateTimeField()
     tag=serializers.CharField(max_length=15)
 
-    # creator= serializers.CharField()
-    # assigner=serializers.CharField()    
+    creator= serializers.CharField()
+    assigner=serializers.CharField()
     
     
     def __str__(self):

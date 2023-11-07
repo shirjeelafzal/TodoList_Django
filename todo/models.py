@@ -24,6 +24,7 @@ class Task(models.Model):
     deadline=models.DateTimeField()
     start=models.DateTimeField()
     tag=models.CharField(max_length=15)
+    
     creator = models.ForeignKey(User, on_delete=models.CASCADE,related_name='task2task',default='1')
     assigner=models.ForeignKey(User, on_delete=models.CASCADE,related_name='assigners',default='1')
     def __str__(self):

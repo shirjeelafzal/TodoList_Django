@@ -28,7 +28,11 @@ def todo_history(request):
     serializer=HistorySerializer(todo,many=True)
     return JsonResponse(serializer.data,safe=False)
 
+# #delete implementaion
+# def todo_task_id(request,pk):
+#     if request.method=="DELETE":
 
+        
 
 
 def todo_list_pk(request,pk):

@@ -93,7 +93,7 @@ def todo_history(request):
         else:
             return JsonResponse(serializer.errors)
         
-################### delete implementaion############################
+################### delete implementaion+updting############################
 
 @csrf_exempt
 def todo_task_id(request,pk):
@@ -103,7 +103,7 @@ def todo_task_id(request,pk):
         # jason_data=JSONRenderer().render(serializer.data)
         # return HttpResponse(jason_data,content_type='application/json')
         return JsonResponse(serializer.data,safe=False)
-    if request.method=="DELETE":
+    elif request.method=="DELETE":
         if Task.objects.get(id=pk):
             data=Task.objects.get(id=pk)
             data.delete()
@@ -120,7 +120,7 @@ def todo_user_id(request,pk):
         # jason_data=JSONRenderer().render(serializer.data)
         # return HttpResponse(jason_data,content_type='application/json')
         return JsonResponse(serializer.data,safe=False)
-    if request.method=="DELETE":
+    elif request.method=="DELETE":
         if CustomUser.objects.get(id=pk):
             data=CustomUser.objects.get(id=pk)
             data.delete()
@@ -136,7 +136,7 @@ def todo_file_id(request,pk):
         # jason_data=JSONRenderer().render(serializer.data)
         # return HttpResponse(jason_data,content_type='application/json')
         return JsonResponse(serializer.data,safe=False)
-    if request.method=="DELETE":
+    elif request.method=="DELETE":
         if File.objects.get(id=pk):
             data=File.objects.get(id=pk)
             data.delete()
@@ -150,19 +150,47 @@ def todo_history_id(request,pk):
         data=History.objects.get(id=pk)
         serializer=HistorySerializer(data)
         return JsonResponse(serializer.data,safe=False)
-    if request.method=="DELETE":
+    elif request.method=="DELETE":
         if History.objects.get(id=pk):
             data=History.objects.get(id=pk)
             data.delete()
             return redirect("/api/history")
         else:
             return HttpResponse("No data to delete")
+    elif request.method=="PUT":
+        data=History.objects.get(id=pk)
+        jason_data=request.body
+        stream=io.BytesIO(jason_data)
+        python_data=JSONParser().parse(stream)
         
+        if 'task' in python_data:
+            task_instance = get_object_or_404(Task, name=python_data['task'])
+            data.task = task_instance
+        if 'user' in python_data:
+            user_instance = get_object_or_404(CustomUser, username=python_data['user'])
+            data.user = user_instance
+        if 'Desciption_change' in python_data:
+            data.Desciption_change = python_data['Desciption_change']
+        if 'time' in python_data:
+            data.time = python_data['time']
+        data.save()
+        return HttpResponse("Data has been updated") 
+    elif request.method=="PATCH":
+        data=History.objects.get(id=pk)
+        jason_data=request.body
+        stream=io.BytesIO(jason_data)
+        python_data=JSONParser().parse(stream)
+        print(python_data)
+        if 'task' not in python_data or 'user' not in python_data or 'Desciption_change' not in python_data or 'time' not in python_data:
+            return HttpResponse("All fields are not provided")
 
 
+        task_instance = get_object_or_404(Task, name=python_data['task'])
+        data.task = task_instance
+        user_instance = get_object_or_404(CustomUser, username=python_data['user'])
+        data.user = user_instance
+        data.Desciption_change = python_data['Desciption_change']
+        data.time = python_data['time']
+        data.save()
+        return HttpResponse("Data has been updated") 
 
-# def todo_list_pk(request,pk):
-#     todo=Task.objects.get(pk)
-#     serializer=TaskSerializer(todo)
-#     jason_data=JSONRenderer().render(serializer.data)
-#     return HttpResponse(jason_data,content_type='application/json')

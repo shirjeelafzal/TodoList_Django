@@ -110,6 +110,59 @@ def todo_task_id(request,pk):
             return redirect("/api/task")
         else:
             return HttpResponse("No data to delete")
+    elif request.method=="PATCH":
+        data=Task.objects.get(id=pk)
+        jason_data=request.body
+        stream=io.BytesIO(jason_data)
+        python_data=JSONParser().parse(stream)
+
+        if 'name' in python_data:
+            data.name = python_data['name']
+        if 'description' in python_data:
+            data.description = python_data['description']
+        if 'status' in python_data:
+            data.status = python_data['status']
+        if 'priority' in python_data:
+            data.priority = python_data['priority']
+        if 'deadline' in python_data:
+            data.deadline = python_data['deadline']
+        if 'start' in python_data:
+            data.start = python_data['start']
+        if 'tag' in python_data:
+            data.tag = python_data['tag']
+        
+        if 'assigner' in python_data:
+            assigner_instance = get_object_or_404(CustomUser, username=python_data['assigner'])
+            data.assigner =assigner_instance 
+        if 'creator' in python_data:
+            creator_instance = get_object_or_404(CustomUser, username=python_data['creator'])
+            data.creator = creator_instance
+        data.save()
+        return HttpResponse("Data has been updated") 
+    elif request.method=="PUT":
+        data=Task.objects.get(id=pk)
+        jason_data=request.body
+        stream=io.BytesIO(jason_data)
+        python_data=JSONParser().parse(stream)
+
+        required_keys = ['name', 'description', 'status', 'priority', 'deadline', 'start', 'tag', 'creator', 'assigner']
+        for key in required_keys:
+            if key not in python_data:
+                return HttpResponse('All fields are not provided')
+
+        data.name = python_data['name']
+        data.description = python_data['description']
+        data.status = python_data['status']
+        data.priority = python_data['priority']
+        data.deadline = python_data['deadline']
+        data.start = python_data['start']
+        data.tag = python_data['tag']
+        assigner_instance = get_object_or_404(CustomUser, username=python_data['assigner'])
+        data.assigner =assigner_instance 
+        creator_instance = get_object_or_404(CustomUser, username=python_data['creator'])
+        data.creator = creator_instance
+        data.save()
+        return HttpResponse("Data has been updated") 
         
 #for user
 @csrf_exempt
@@ -157,7 +210,7 @@ def todo_history_id(request,pk):
             return redirect("/api/history")
         else:
             return HttpResponse("No data to delete")
-    elif request.method=="PUT":
+    elif request.method=="PATCH":
         data=History.objects.get(id=pk)
         jason_data=request.body
         stream=io.BytesIO(jason_data)
@@ -175,12 +228,11 @@ def todo_history_id(request,pk):
             data.time = python_data['time']
         data.save()
         return HttpResponse("Data has been updated") 
-    elif request.method=="PATCH":
+    elif request.method=="PUT":
         data=History.objects.get(id=pk)
         jason_data=request.body
         stream=io.BytesIO(jason_data)
         python_data=JSONParser().parse(stream)
-        print(python_data)
         if 'task' not in python_data or 'user' not in python_data or 'Desciption_change' not in python_data or 'time' not in python_data:
             return HttpResponse("All fields are not provided")
 

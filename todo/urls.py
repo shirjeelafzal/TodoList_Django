@@ -8,6 +8,9 @@ urlpatterns = [
     path('file',views.todo_file),
     path('history',views.todo_history),
 
-
-    path('todo/<int:pk>',views.todo_list_pk,name='display'),
+    # urls for the numbered hits
+    path('task/<int:pk>',views.todo_task_id),
+    path('user/<int:pk>',views.todo_user_id),
+    path('file/<int:pk>',views.todo_file_id),
+    path('history/<int:pk>',views.todo_history_id),
 ]

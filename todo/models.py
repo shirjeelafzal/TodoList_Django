@@ -6,6 +6,7 @@ class CustomUser(User):
     # Add your custom fields here
     view = models.BooleanField(default=False)
     edit = models.BooleanField(default=False)
+    
 class Task(models.Model):
     status_choices = [
         ("to_do", "to_do"),

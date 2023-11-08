@@ -1,36 +1,100 @@
-from django.shortcuts import render,HttpResponse,redirect
+from django.shortcuts import render,HttpResponse,redirect,get_object_or_404
 from django.http import JsonResponse
 from .models import Task,CustomUser,File,History
-from .serializers import TaskSerializer,CustomUserSerializer,FileSerializer,HistorySerializer
+from .serializers import TaskSerializer,CustomUserSerializer,FileSerializer,HistorySerializer#,HistorySerializer2
 from rest_framework.renderers import JSONRenderer
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.csrf import csrf_exempt
+import io
+from rest_framework.parsers import JSONParser
 # Create your views here.
 
-#end point for showing all data
+################### End point for showing all data and for creating new instances ############################
+@csrf_exempt
 def todo_task(request):
-    todo=Task.objects.all()
-    serializer=TaskSerializer(todo,many=True)
-    # jason_data=JSONRenderer().render(serializer.data)
-    #HttpResponse(jason_data,content_type='application/json')
-    return JsonResponse(serializer.data,safe=False)
+    if request.method=='GET':
+        todo=Task.objects.all()
+        serializer=TaskSerializer(todo,many=True)
+        # jason_data=JSONRenderer().render(serializer.data)
+        #HttpResponse(jason_data,content_type='application/json')
+        return JsonResponse(serializer.data,safe=False)
+    elif request.method=='POST':
+        jason_data=request.body
+        print(jason_data)
+        stream=io.BytesIO(jason_data)
+        python_data=JSONParser().parse(stream)
+        creator_instance=get_object_or_404(CustomUser,username=python_data['creator']).pk
+        assigner_instance=get_object_or_404(CustomUser,username=python_data['assigner']).pk
+        python_data['creator']=creator_instance
+        python_data['assigner']=assigner_instance
+        serializer=TaskSerializer(data=python_data)
+        if serializer.is_valid():
+            serializer.save()
+            return HttpResponse('Data has been saved')
+        else:
+            return JsonResponse(serializer.errors)
+@csrf_exempt
 def todo_user(request):
-    todo=CustomUser.objects.all()
-    serializer=CustomUserSerializer(todo,many=True)
-    return JsonResponse(serializer.data,safe=False)
-
+    if request.method=="GET":
+        todo=CustomUser.objects.all()
+        serializer=CustomUserSerializer(todo,many=True)
+        return JsonResponse(serializer.data,safe=False)
+    elif request.method=='POST':
+        jason_data=request.body
+        stream=io.BytesIO(jason_data)
+        python_data=JSONParser().parse(stream)
+        serializer=CustomUserSerializer(data=python_data)
+        if serializer.is_valid():
+            serializer.save()
+            return HttpResponse('Data has been saved')
+        else:
+            return JsonResponse(serializer.errors)
+@csrf_exempt
 def todo_file(request):
-    todo=File.objects.all()
-    serializer=FileSerializer(todo,many=True)
-    return JsonResponse(serializer.data,safe=False)
+    if request.method=='GET':
+        todo=File.objects.all()
+        serializer=FileSerializer(todo,many=True)
+        return JsonResponse(serializer.data,safe=False)
+    elif request.method=='POST':
+        jason_data=request.body
+        print(type(jason_data))
+        # with open('fcc.json', 'r') as fcc_file:
+        stream=io.BytesIO(jason_data)
+        python_data=JSONParser().parse(request)
+        task_instace=get_object_or_404(Task,name=python_data['task']).pk
+        python_data['task']=task_instace
+        print(python_data)
+        serializer=FileSerializer(data=python_data)
+        if serializer.is_valid():
+            serializer.save()
+            return HttpResponse('Data has been saved')
+        else:
+            return JsonResponse(serializer.errors)
 
+@csrf_exempt
 def todo_history(request):
-    todo=History.objects.all()
-    serializer=HistorySerializer(todo,many=True)
-    return JsonResponse(serializer.data,safe=False)
+    if request.method=='GET':
+        todo=History.objects.all()
+        serializer=HistorySerializer(todo,many=True)
+        return JsonResponse(serializer.data,safe=False)
+    elif request.method=="POST":
+        jason_data=request.body
+        stream=io.BytesIO(jason_data)
+        python_data=JSONParser().parse(stream)
+        task_instance=get_object_or_404(Task,name=python_data['task']).pk
+        user_instance=get_object_or_404(CustomUser,username=python_data['user']).pk
+        python_data['task']=task_instance
+        python_data['user']=user_instance
+        serializer=HistorySerializer(data=python_data)
+        if serializer.is_valid():
+            serializer.save()
+            return HttpResponse('Data has been saved')
+        else:
+            return JsonResponse(serializer.errors)
+        
+################### delete implementaion############################
 
-# delete implementaion
 @csrf_exempt
 def todo_task_id(request,pk):
     if request.method=="GET":

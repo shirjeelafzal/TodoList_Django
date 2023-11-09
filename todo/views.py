@@ -1,5 +1,6 @@
+import os
 from django.shortcuts import render,HttpResponse,redirect,get_object_or_404
-from django.http import JsonResponse
+from django.http import HttpResponseBadRequest, HttpResponseServerError, JsonResponse
 from .models import Task,CustomUser,File,History
 from .serializers import TaskSerializer,CustomUserSerializer,FileSerializer,HistorySerializer#,HistorySerializer2
 from rest_framework.renderers import JSONRenderer
@@ -8,6 +9,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.csrf import csrf_exempt
 import io
 from rest_framework.parsers import JSONParser
+import json
 # Create your views here.
 
 ################### End point for showing all data and for creating new instances ############################
@@ -57,20 +59,18 @@ def todo_file(request):
         serializer=FileSerializer(todo,many=True)
         return JsonResponse(serializer.data,safe=False)
     elif request.method=='POST':
-        jason_data=request.body
-        print(type(jason_data))
-        # with open('fcc.json', 'r') as fcc_file:
-        stream=io.BytesIO(jason_data)
-        python_data=JSONParser().parse(request)
-        task_instace=get_object_or_404(Task,name=python_data['task']).pk
-        python_data['task']=task_instace
-        print(python_data)
-        serializer=FileSerializer(data=python_data)
-        if serializer.is_valid():
-            serializer.save()
-            return HttpResponse('Data has been saved')
-        else:
-            return JsonResponse(serializer.errors)
+        file=request.FILES.get('files')
+        task_name=request.POST['task']
+        # mu_var=task_name
+        try:
+            task_instance = get_object_or_404(Task, name=task_name)
+            pdf_file_instance = File.objects.create(files=file,task=task_instance)
+            return JsonResponse('Data has been stroed',safe=False)
+        except Exception as e:
+            return HttpResponseServerError(f"Error uploading the file: {str(e)}")
+
+
+        
 
 @csrf_exempt
 def todo_history(request):
@@ -245,6 +245,55 @@ def todo_file_id(request,pk):
             return redirect("/api/file")
         else:
             return HttpResponse("No data to delete")
+    elif request.method=='PATCH':
+        current_instance = File.objects.get(id=pk)
+        if request.content_type.startswith('multipart'):
+            task_name, files = request.parse_file_upload(request.META, request)
+            if len(task_name) == 0:
+                request.FILES.update(files)
+                file = request.FILES['files']
+                current_instance.files = file
+                current_instance.save()
+                return JsonResponse('Data has been strored', safe=False)
+            elif len(files) == 0:
+                taskname=task_name['task']
+                task_instance = get_object_or_404(Task, name=taskname)
+                current_instance.task = task_instance
+                current_instance.save()
+                return JsonResponse('Data has been strored', safe=False)
+            else:
+                request.FILES.update(files)
+                file = request.FILES['files']
+                current_instance.files = file
+                taskname = task_name['task']
+                task_instance = get_object_or_404(Task, name=taskname)
+                current_instance.task = task_instance
+                current_instance.save()
+                return JsonResponse('Data has been strored', safe=False)
+
+
+        else:
+            return JsonResponse('Data sent is incorrect', safe=False)
+    elif request.method=='PUT':
+        current_instance = File.objects.get(id=pk)
+        if request.content_type.startswith('multipart'):
+            task_name, files = request.parse_file_upload(request.META, request)
+
+
+            if len(task_name)==0 or len(files)==0:
+                return JsonResponse('All fields are not entered', safe=False)
+            request.FILES.update(files)
+            file = request.FILES['files']
+            taskname = task_name['task']
+            task_instance = get_object_or_404(Task, name=taskname)
+            current_instance.files=file
+            current_instance.task=task_instance
+            current_instance.save()
+            return JsonResponse('Data has been strored', safe=False)
+        else:
+            return JsonResponse('Data sent is incorrect', safe=False)
+
+
 #for history
 @csrf_exempt
 def todo_history_id(request,pk):

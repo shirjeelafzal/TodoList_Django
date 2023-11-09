@@ -32,7 +32,9 @@ class Task(models.Model):
     
     
 class File(models.Model):
-    files=models.FileField()
+    def nameFile(instance,filename):
+        return '/'.join(['files',str(instance.task),filename])
+    files=models.FileField(upload_to=nameFile,blank=True)
     task=models.ForeignKey(Task, on_delete=models.CASCADE,default=None)
     def __str__(self):
         return (str(self.task))

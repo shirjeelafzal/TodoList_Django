@@ -115,7 +115,6 @@ def todo_task_id(request,pk):
         jason_data=request.body
         stream=io.BytesIO(jason_data)
         python_data=JSONParser().parse(stream)
-
         if 'name' in python_data:
             data.name = python_data['name']
         if 'description' in python_data:
@@ -170,8 +169,6 @@ def todo_user_id(request,pk):
     if request.method=="GET":
         data=CustomUser.objects.get(id=pk)
         serializer=CustomUserSerializer(data)
-        # jason_data=JSONRenderer().render(serializer.data)
-        # return HttpResponse(jason_data,content_type='application/json')
         return JsonResponse(serializer.data,safe=False)
     elif request.method=="DELETE":
         if CustomUser.objects.get(id=pk):
@@ -180,14 +177,66 @@ def todo_user_id(request,pk):
             return redirect("/api/user")
         else:
             return HttpResponse("No data to delete")
+    elif request.method=="PATCH":
+        data=CustomUser.objects.get(id=pk)
+        jason_data=request.body
+        stream=io.BytesIO(jason_data)
+        python_data=JSONParser().parse(stream)
+        
+        if 'password' in python_data:
+            data.password=python_data['password']          
+        if 'username' in python_data:
+            data.username=python_data['username']
+        if 'datejoined' in python_data:
+            data.Desciption_change = python_data['datejoined']
+        if 'view' in python_data:
+            data.view=python_data['view']
+        if 'edit' in python_data:
+            data.view=python_data['edit']
+        if 'is_staff' in python_data:
+            data.view=python_data['is_staff']
+        if 'is_active' in python_data:
+            data.view=python_data['is_active']
+        if 'is_superuser' in python_data:
+            data.view=python_data['is_superuser']
+        if 'first_name' in python_data:
+            data.first_name=python_data['first_name']
+        if 'last_name' in python_data:
+            data.first_name=python_data['last_name']
+        if 'email' in python_data:
+            data.first_name=python_data['email']
+        
+        data.save()
+        return HttpResponse("Data has been updated") 
+    elif request.method=="PUT":
+        data=CustomUser.objects.get(id=pk)
+        jason_data=request.body
+        stream=io.BytesIO(jason_data)
+        python_data=JSONParser().parse(stream)
+        print(python_data)
+        required_keys = ['first_name','last_name','email','password', 'username', 'datejoined', 'view', 'edit', 'is_staff', 'is_active', 'is_superuser']
+        for key in required_keys:
+            if key not in python_data:
+                return HttpResponse('All fields are not provided')
+        data.password=python_data['password']          
+        data.username=python_data['username']
+        data.Desciption_change = python_data['datejoined']
+        data.view=python_data['view']
+        data.view=python_data['edit']
+        data.view=python_data['is_staff']
+        data.view=python_data['is_active']
+        data.view=python_data['is_superuser']
+        data.first_name=python_data['first_name']
+        data.first_name=python_data['last_name']
+        data.first_name=python_data['email']
+        data.save()
+        return HttpResponse("Data has been updated")
 #for file
 @csrf_exempt
 def todo_file_id(request,pk):
     if request.method=="GET":
         data=File.objects.get(id=pk)
         serializer=FileSerializer(data)
-        # jason_data=JSONRenderer().render(serializer.data)
-        # return HttpResponse(jason_data,content_type='application/json')
         return JsonResponse(serializer.data,safe=False)
     elif request.method=="DELETE":
         if File.objects.get(id=pk):

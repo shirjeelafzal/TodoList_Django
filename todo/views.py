@@ -270,16 +270,12 @@ def todo_file_id(request,pk):
                 current_instance.task = task_instance
                 current_instance.save()
                 return JsonResponse('Data has been strored', safe=False)
-
-
         else:
             return JsonResponse('Data sent is incorrect', safe=False)
     elif request.method=='PUT':
         current_instance = File.objects.get(id=pk)
         if request.content_type.startswith('multipart'):
             task_name, files = request.parse_file_upload(request.META, request)
-
-
             if len(task_name)==0 or len(files)==0:
                 return JsonResponse('All fields are not entered', safe=False)
             request.FILES.update(files)

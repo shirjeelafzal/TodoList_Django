@@ -1,6 +1,6 @@
-.idea/
-.vscode/
-myenv/
+.idea
+.vscode
+myenv
+.env
 dbsqlite3
 myapp.py
-CoffeeMachineProgramRequirements*.pdf

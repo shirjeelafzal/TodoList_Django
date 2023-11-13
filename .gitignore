@@ -1,6 +1,0 @@
-.idea/
-.vscode
-myenv/
-.env
-db.sqlite3
-myapp.py

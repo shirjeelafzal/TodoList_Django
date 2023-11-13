@@ -22,25 +22,38 @@ from drf_spectacular.views import SpectacularAPIView,SpectacularSwaggerView
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-schema_view = get_schema_view(
-    openapi.Info(
-        title="Your API Title",
-        default_version="v1",
-        description="Your API description",
-        terms_of_service="https://www.example.com/terms/",
-        contact=openapi.Contact(email="contact@example.com"),
-        license=openapi.License(name="Your License"),
-    ),
-    public=True,
-    permission_classes=(permissions.AllowAny,),
-)
+from rest_framework.routers import DefaultRouter
+from todo import views
+from django.urls import re_path
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+# schema_view = get_schema_view(
+#     openapi.Info(
+#         title="API Documentation",
+#         default_version="v1",
+#         description="Todo List API Documentation",
+#         terms_of_service="https://www.example.com/terms/",
+#         contact=openapi.Contact(email="contact@example.com"),
+#         license=openapi.License(name="Your License"),
+#     ),
+#     public=True,
+#     permission_classes=(permissions.AllowAny,),
+# )
 # from app import views
+router=DefaultRouter()
+router.register(r"task",views.TaskViewSet)
+router.register(r"user",views.UserViewSet)
+router.register(r"history",views.HistoryViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/',include('todo.urls')),
-    # path('api/schema/',SpectacularAPIView.as_view(),name="schema"),
-    # path('api/schema/docs/',SpectacularSwaggerView.as_view(url_name="schema")),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('api/',include(router.urls)),
+    path('api/schema/',SpectacularAPIView.as_view(),name="schema"),
+    path('api/schema/docs/',SpectacularSwaggerView.as_view(url_name="schema")),
+    # path('api/',include('todo.urls')),
+
+    # path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    # path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
 ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)

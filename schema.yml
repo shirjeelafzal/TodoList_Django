@@ -1,0 +1,112 @@
+openapi: 3.0.3
+info:
+  title: Todo API
+  version: 1.0.0
+  description: API for the todo project
+paths:
+  /api/task/:
+    get:
+      operationId: api_task_list
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+          description: ''
+  /api/task/{id}/:
+    get:
+      operationId: api_task_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this task.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: ''
+components:
+  schemas:
+    PriorityEnum:
+      enum:
+      - low
+      - medium
+      - high
+      type: string
+      description: |-
+        * `low` - low
+        * `medium` - medium
+        * `high` - high
+    StatusEnum:
+      enum:
+      - to_do
+      - in_progress
+      - done
+      type: string
+      description: |-
+        * `to_do` - to_do
+        * `in_progress` - in_progress
+        * `done` - done
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 15
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        priority:
+          $ref: '#/components/schemas/PriorityEnum'
+        deadline:
+          type: string
+          format: date-time
+        start:
+          type: string
+          format: date-time
+        tag:
+          type: string
+          maxLength: 15
+        creator:
+          type: integer
+        assigner:
+          type: integer
+      required:
+      - deadline
+      - description
+      - id
+      - name
+      - start
+      - tag
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

@@ -43,8 +43,8 @@ class History(models.Model):
     Desciption_change=models.TextField()
     time=models.DateTimeField()
     
-    task=models.ForeignKey(Task, on_delete=models.CASCADE,default=None)
-    user=models.ForeignKey(CustomUser, on_delete=models.CASCADE,default=None)
+    task=models.ForeignKey(Task, on_delete=models.CASCADE,default=None,null=True)
+    user=models.ForeignKey(CustomUser, on_delete=models.CASCADE,default=None,null=True)
     
     def __str__(self):
         return (str(self.task))

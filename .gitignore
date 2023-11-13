@@ -1,6 +1,6 @@
-.idea
+.idea/
 .vscode
 myenv
 .env
-dbsqlite3
+db.sqlite3
 myapp.py

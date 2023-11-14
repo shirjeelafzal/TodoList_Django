@@ -1,17 +1,24 @@
-from django.contrib import admin
-from django.urls import path,include
-from . import views
+from django.urls import path, include
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from rest_framework.routers import DefaultRouter
+from todo import views
+
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+
+router = DefaultRouter()
+router.register(r"task", views.TaskViewSet)
+router.register(r"user", views.UserViewSet)
+router.register(r"history", views.HistoryViewSet)
+router.register(r"file", views.FileViewSet)
 urlpatterns = [
-    #urls for Read
-    # path('task',views.todo_task),
-    # path('user',views.todo_user),
-    # path('file',views.todo_file),
-    # path('history',views.todo_history),
-    #
-    # # urls for the numbered hits
-    # path('task/<int:pk>',views.todo_task_id),
-    # path('user/<int:pk>',views.todo_user_id),
-    # path('file/<int:pk>',views.todo_file_id),
-    # path('history/<int:pk>',views.todo_history_id),
+    path('api/', include(router.urls)),
+    # path('login/',views.LoginAPI.as_view()),
+    path('api/schema/', SpectacularAPIView.as_view(), name="schema"),
+    path('api/schema/docs/', SpectacularSwaggerView.as_view(url_name="schema")),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
 ]

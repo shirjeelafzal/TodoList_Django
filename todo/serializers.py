@@ -1,22 +1,31 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
-from .models import Task, File,History,CustomUser
+from .models import Task, File, History, CustomUser
+
+
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
-        model=CustomUser
-        fields='__all__'
+        model = CustomUser
+        fields = '__all__'
+
+
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
-        model=Task
-        fields='__all__'
+        model = Task
+        fields = '__all__'
 
 
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
-        fields = '__all__' 
-class HistorySerializer(serializers.ModelSerializer):
+        fields = '__all__'
 
+
+class HistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = History
         fields = '__all__'
+
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField()

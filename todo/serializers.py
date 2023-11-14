@@ -6,8 +6,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
         model=CustomUser
         fields='__all__'
 class TaskSerializer(serializers.ModelSerializer):
-    # creator=CustomUserSerializer()
-    # assigner=CustomUserSerializer()
     class Meta:
         model=Task
         fields='__all__'
@@ -18,8 +16,6 @@ class FileSerializer(serializers.ModelSerializer):
         model = File
         fields = '__all__' 
 class HistorySerializer(serializers.ModelSerializer):
-    # task=TaskSerializer()
-    # user=CustomUserSerializer()
 
     class Meta:
         model = History

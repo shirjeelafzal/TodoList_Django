@@ -14,13 +14,13 @@ class TaskSerializer(serializers.ModelSerializer):
 
 
 class FileSerializer(serializers.ModelSerializer):
-    # task=TaskSerializer()
     class Meta:
         model = File
         fields = '__all__' 
 class HistorySerializer(serializers.ModelSerializer):
     # task=TaskSerializer()
     # user=CustomUserSerializer()
+
     class Meta:
         model = History
         fields = '__all__'

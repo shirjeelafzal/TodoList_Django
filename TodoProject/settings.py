@@ -137,11 +137,16 @@ STATICFILES_DIRS = [
 REST_FRAMEWORK = {
     # YOUR SETTINGS
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.MultiPartParser',
+    ],
 }
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Todo API',
     'DESCRIPTION': 'API for the todo project',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
     # OTHER SETTINGS
 }

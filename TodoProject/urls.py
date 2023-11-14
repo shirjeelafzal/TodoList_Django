@@ -46,6 +46,7 @@ router=DefaultRouter()
 router.register(r"task",views.TaskViewSet)
 router.register(r"user",views.UserViewSet)
 router.register(r"history",views.HistoryViewSet)
+router.register(r"file",views.FileViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/',include(router.urls)),

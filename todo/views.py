@@ -1,57 +1,11 @@
-from django.shortcuts import render, HttpResponse, redirect, get_object_or_404
-from django.http import HttpResponseBadRequest, HttpResponseServerError, JsonResponse
+from django.shortcuts import  get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
-from django.contrib.auth import authenticate
 
-from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Task, CustomUser, File, History
-from .serializers import TaskSerializer, CustomUserSerializer, FileSerializer, HistorySerializer, LoginSerializer
-from rest_framework.renderers import JSONRenderer
-from django.contrib.auth.models import User
-from django.views.decorators.csrf import csrf_protect
-from django.views.decorators.csrf import csrf_exempt
-import io
-from rest_framework.parsers import JSONParser, MultiPartParser
-from rest_framework import status, parsers, renderers
-import json
+from .serializers import TaskSerializer, CustomUserSerializer, FileSerializer, HistorySerializer
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.generics import GenericAPIView
-from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework.views import APIView
-
-
-# class LoginAPI(APIView):
-#     def post(self,request):
-#         try:
-#             data=request.data
-#             serializer=LoginSerializer(data)
-#             if serializer.is_valid():
-#                 email=serializer.data['data']
-#                 password=serializer.data['password']
-#                 user=authenticate(email=email,password=password)
-#                 if user is None:
-#                     return Response({'status': 400,
-#                                      'message': "email or password is wrong",
-#                                      'data': serializer.errors,
-#                                      })
-#                 else:
-#                     refresh = RefreshToken.for_user(user)
-#
-#                     return {
-#                         'refresh': str(refresh),
-#                         'access': str(refresh.access_token),
-#                     }
-#
-#             else:
-#                 return Response({'status':400,
-#                                  'message':"something went wrong",
-#                                  'data':serializer.errors,
-#                                  })
-#         except:
-#             return Response({'status': 400,
-#                              'message': "something went wrong",
-#                              })
+from drf_spectacular.utils import extend_schema
 
 
 @extend_schema(responses=TaskSerializer)

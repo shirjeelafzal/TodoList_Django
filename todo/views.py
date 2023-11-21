@@ -1,11 +1,9 @@
 from django.contrib.auth import authenticate
 from django.shortcuts import  get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
-
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import AllowAny
 from .models import Task, User, File, History
-from .serializers import TaskSerializer, UserSerializer, FileSerializer, HistorySerializer,LoginSerializer,ProfileViewSerializer
+from .serializers import TaskSerializer, UserSerializer, FileSerializer, HistorySerializer,LoginSerializer
 from rest_framework import viewsets, status
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
@@ -16,11 +14,12 @@ def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
 
     return {
-        'refresh': str(refresh),
+        #'refresh': str(refresh),
         'access': str(refresh.access_token),
     }
 class LoginViewSet(viewsets.ViewSet):
     queryset = User.objects.all()
+    permission_classes = [AllowAny]
     def create(self,request):
         serializer=LoginSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -96,8 +95,6 @@ class UserViewSet(viewsets.ViewSet):
 
 @extend_schema(responses=TaskSerializer)
 class TaskViewSet(viewsets.ViewSet):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
     serializer_class = TaskSerializer
     queryset = Task.objects.all()
 
@@ -124,7 +121,7 @@ class TaskViewSet(viewsets.ViewSet):
         try:
             obj = Task.objects.get(id=pk)
             obj.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response({"message":"Task has been deleted"},status=status.HTTP_200_OK)
         except:
             return Response({"message": "No data to delete"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -135,6 +132,10 @@ class TaskViewSet(viewsets.ViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, pk=None):
+        my_pk=pk
+        new_description=request.data['description']
+        history_objects=History.objects.filter(task__pk=my_pk)
+        history_objects.update(Desciption_change=new_description)
         item = get_object_or_404(Task.objects.all(), pk=pk)
         serializer = TaskSerializer(item, data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -142,6 +143,10 @@ class TaskViewSet(viewsets.ViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None):
+        my_pk = pk
+        new_description = request.data['description']
+        history_objects = History.objects.filter(task__pk=my_pk)
+        history_objects.update(Desciption_change=new_description)
         item = get_object_or_404(Task.objects.all(), pk=pk)
         serializer = TaskSerializer(item, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -272,12 +277,3 @@ class FileViewSet(viewsets.ViewSet):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-class ProfileViewSet(viewsets.ViewSet):
-
-    permission_classes = [IsAuthenticated]
-    def list(self,request):
-        try:
-            serializer=ProfileViewSerializer(request.user)
-            return Response(serializer.data,status=status.HTTP_200_OK)
-        except:
-            return Response({'error':"Could not verify user"}, status=status.HTTP_404_NOT_FOUND)

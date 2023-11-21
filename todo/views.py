@@ -1,16 +1,103 @@
+from django.contrib.auth import authenticate
 from django.shortcuts import  get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
 
-from .models import Task, CustomUser, File, History
-from .serializers import TaskSerializer, CustomUserSerializer, FileSerializer, HistorySerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from .models import Task, User, File, History
+from .serializers import TaskSerializer, UserSerializer, FileSerializer, HistorySerializer,LoginSerializer,ProfileViewSerializer
 from rest_framework import viewsets, status
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
+from rest_framework_simplejwt.tokens import RefreshToken
+
+def get_tokens_for_user(user):
+    refresh = RefreshToken.for_user(user)
+
+    return {
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }
+class LoginViewSet(viewsets.ViewSet):
+    queryset = User.objects.all()
+    def create(self,request):
+        serializer=LoginSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            email=serializer.data.get('email')
+            password=serializer.data.get('password')
+            user=authenticate(email=email,password=password)
+            if user is not None:
+                token=get_tokens_for_user(user)
+                return Response({'token':token,'message':"Login Successful"},status=status.HTTP_202_ACCEPTED)
+            else:
+                return Response({'errors':{'non_field_errors':['Email or password is not correct']}}, status=status.HTTP_203_NON_AUTHORITATIVE_INFORMATION)
+
+@extend_schema(responses=UserSerializer)
+class UserViewSet(viewsets.ViewSet):
+    serializer_class = UserSerializer()
+    queryset = User.objects.all()
+
+    def list(self, request):
+        if User.objects.all():
+            queryset = User.objects.all()
+            serializer = UserSerializer(queryset, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({"message": "No data available"}, status=status.HTTP_404_NOT_FOUND)
+
+    def retrieve(self, request, pk=None):
+        try:
+            viewset = User.objects.get(id=pk)
+            serializer = UserSerializer(viewset)
+            return Response(serializer.data)
+        except:
+            return Response({"message": "This user does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+    def destroy(self, request, pk=None):
+        try:
+            obj = User.objects.get(id=pk)
+            obj.delete()
+            return Response({"massage":"The user has been deleted successfully"},status=status.HTTP_200_OK)
+        except:
+            return Response({"message": "This user does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+    def create(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            user=serializer.save()
+            token = get_tokens_for_user(user)
+            return Response({'token': token, 'messagge': 'User created'}, status=status.HTTP_201_CREATED)
+
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, pk=None):
+        try:
+            item = get_object_or_404(User.objects.all(), pk=pk)
+            serializer = UserSerializer(item, data=request.data)
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except:
+            return Response({"No user exists with this id"}, status=status.HTTP_400_BAD_REQUEST)
+
+    def partial_update(self, request, pk=None):
+        try:
+            item = get_object_or_404(User.objects.all(), pk=pk)
+            serializer = UserSerializer(item, data=request.data, partial=True)
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except:
+            return Response({"No user exists with this id"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @extend_schema(responses=TaskSerializer)
 class TaskViewSet(viewsets.ViewSet):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     serializer_class = TaskSerializer
     queryset = Task.objects.all()
 
@@ -61,55 +148,6 @@ class TaskViewSet(viewsets.ViewSet):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-
-@extend_schema(responses=CustomUserSerializer)
-class UserViewSet(viewsets.ViewSet):
-    serializer_class = CustomUserSerializer()
-    queryset = CustomUser.objects.all()
-
-    def list(self, request):
-        if CustomUser.objects.all():
-            queryset = CustomUser.objects.all()
-            serializer = CustomUserSerializer(self.queryset, many=True)
-            return Response(serializer.data)
-        else:
-            return Response({"message": "No data available"}, status=status.HTTP_404_NOT_FOUND)
-
-    def retrieve(self, request, pk=None):
-        try:
-            viewset = CustomUser.objects.get(id=pk)
-            serializer = CustomUserSerializer(viewset)
-            return Response(serializer.data)
-        except:
-            return Response({"message": "This user does not exist"}, status=status.HTTP_404_NOT_FOUND)
-
-    def destroy(self, request, pk=None):
-        try:
-            obj = CustomUser.objects.get(id=pk)
-            obj.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except:
-            return Response({"message": "This user does not exist"}, status=status.HTTP_404_NOT_FOUND)
-
-    def create(self, request):
-        serializer = CustomUserSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def update(self, request, pk=None):
-        item = get_object_or_404(CustomUser.objects.all(), pk=pk)
-        serializer = CustomUserSerializer(item, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def partial_update(self, request, pk=None):
-        item = get_object_or_404(CustomUser.objects.all(), pk=pk)
-        serializer = CustomUserSerializer(item, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 @extend_schema(responses=HistorySerializer)
@@ -234,3 +272,12 @@ class FileViewSet(viewsets.ViewSet):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+class ProfileViewSet(viewsets.ViewSet):
+
+    permission_classes = [IsAuthenticated]
+    def list(self,request):
+        try:
+            serializer=ProfileViewSerializer(request.user)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except:
+            return Response({'error':"Could not verify user"}, status=status.HTTP_404_NOT_FOUND)

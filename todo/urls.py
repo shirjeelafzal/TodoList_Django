@@ -15,6 +15,8 @@ router.register(r"history", views.HistoryViewSet)
 router.register(r"file", views.FileViewSet)
 urlpatterns = [
     path('api/', include(router.urls)),
+    path('login/',views.LoginViewSet.as_view({'post': 'create'})),
+    path('profileview/',views.ProfileViewSet.as_view({'get': 'list'})),
     path('api/schema/', SpectacularAPIView.as_view(), name="schema"),
     path('api/schema/docs/', SpectacularSwaggerView.as_view(url_name="schema")),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
